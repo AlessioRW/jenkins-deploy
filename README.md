@@ -1,6 +1,6 @@
 # jenkins-deploy
 
-## Command line tool to run Jenkins Deployments
+## CLI tool to run Jenkins Deployments
 
 To use, first create and configure the environments.json file using 
 `sh deploy.sh add` \
