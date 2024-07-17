@@ -1,12 +1,12 @@
-require('dotenv').config();
 const fs = require('fs')
 const path = require('node:path');
 const prompt = require('prompt-sync')();
 const environments = require('./environments.json');
+const cliProgress = require('cli-progress');
 const args = process.argv.slice(2);
 
+require('dotenv').config({ path: __dirname + '/.env' });
 
-console.log()
 // user did not pass a env
 if (!args[0]) {
     console.log('\nError: Please provide an environment to deploy to or a flag');
@@ -86,10 +86,45 @@ const requestOptions = {
     redirect: "follow"
 };
 
+///lastBuild/api/json
+
+const delay = ms => new Promise(res => setTimeout(res, ms));
+
 fetch(`${environments[passedEnv]}/build?delay=0sec`, requestOptions)
-    .then((response) => response.text)
-    .then((result) => {
-        console.log("\nBuild triggered successfully");
+    .then(async (res) => {
+        if (res.status == 401) {
+            console.log(`\nFailed to trigger build with error:  ${res.statusText} (Code ${res.status})`);
+        }
+        else if (res.status == 201) {
+            console.log("\nBuild triggered successfully");
+
+            const bar1 = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
+            let count = 0
+            const start = Date.now();
+            let timeCount = 0
+            while (true) {
+                await delay(3000);
+                const res = await fetch(`${environments[passedEnv]}lastBuild/api/json`, requestOptions)
+                const data = await res.json()
+                const status = data.result
+
+                if (count == 0) {
+                    bar1.start(Math.floor(data.estimatedDuration / 1000), 0);
+                    count++;
+                }
+                const diff = Math.floor((Date.now() - (start + timeCount)) / 1000);
+                timeCount += diff
+                bar1.update(diff);
+
+
+                if (status) {
+                    bar1.stop()
+                    console.log(`\nBuild Complete: ${status}`);
+                    break;
+                }
+            }
+
+        }
     })
     .catch((error) => {
         console.log("\nFailed to trigger build with error: ", error);
