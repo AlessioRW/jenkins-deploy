@@ -9,7 +9,7 @@ require('dotenv').config({ path: __dirname + '/.env' });
 
 // user did not pass a env
 if (!args[0]) {
-    console.log('\nError: Please provide an environment to deploy to or a flag');
+    console.log('Error: Please provide an environment to deploy to or a flag');
     process.exit(1);
 }
 
@@ -74,7 +74,7 @@ else if (passedEnv === 'help') { // list all available commands
 
 // env not in environment map
 if (!environments[passedEnv]) {
-    console.log('\nError: The environment provided is not valid');
+    console.log('Error: The environment provided is not valid');
     process.exit(1);
 }
 
@@ -93,10 +93,10 @@ const delay = ms => new Promise(res => setTimeout(res, ms));
 fetch(`${environments[passedEnv]}/build?delay=0sec`, requestOptions)
     .then(async (res) => {
         if (res.status == 401) {
-            console.log(`\nFailed to trigger build with error:  ${res.statusText} (Code ${res.status})`);
+            console.log(`Failed to trigger build with error:  ${res.statusText} (Code ${res.status})`);
         }
         else if (res.status == 201) {
-            console.log("\nBuild triggered successfully");
+            console.log("Build triggered successfully");
 
             const bar1 = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
             let count = 0
@@ -119,7 +119,7 @@ fetch(`${environments[passedEnv]}/build?delay=0sec`, requestOptions)
 
                 if (status) {
                     bar1.stop()
-                    console.log(`\nBuild Complete: ${status}`);
+                    console.log(`Build Complete: ${status}`);
                     break;
                 }
             }
@@ -127,6 +127,6 @@ fetch(`${environments[passedEnv]}/build?delay=0sec`, requestOptions)
         }
     })
     .catch((error) => {
-        console.log("\nFailed to trigger build with error: ", error);
+        console.log("Failed to trigger build with error: ", error);
     });
 
